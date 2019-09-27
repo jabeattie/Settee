@@ -97,7 +97,7 @@ class OperationRequestBuilder {
         }
         var path = operation.httpPath
         if let existingPath = components.path?.replacingOccurrences(of: "/", with: "") {
-            path = "\(existingPath)\(path)"
+            path = "/\(existingPath)\(path)"
         }
         components.path = path
         var queryItems: [URLQueryItem] = []
