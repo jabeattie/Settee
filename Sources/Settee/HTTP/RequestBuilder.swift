@@ -96,8 +96,8 @@ class OperationRequestBuilder {
             throw Error.URLGenerationFailed
         }
         var path = operation.httpPath
-        if let existingPath = components.path {
-            path = "\(existingPath)/\(path)"
+        if let existingPath = components.path?.replacingOccurrences(of: "/", with: "") {
+            path = "\(existingPath)\(path)"
         }
         components.path = path
         var queryItems: [URLQueryItem] = []
