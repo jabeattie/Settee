@@ -92,11 +92,14 @@ class OperationRequestBuilder {
      */
     func makeRequest() throws -> URLRequest {
         
-        guard let components = NSURLComponents(url: operation.rootURL, resolvingAgainstBaseURL: false)
-        else {
+        guard let components = NSURLComponents(url: operation.rootURL, resolvingAgainstBaseURL: false) else {
             throw Error.URLGenerationFailed
         }
-        components.path = operation.httpPath
+        var path = operation.httpPath
+        if let existingPath = components.path {
+            path = "\(existingPath)/\(path)"
+        }
+        components.path = path
         var queryItems: [URLQueryItem] = []
 
         if let _ = components.queryItems {
@@ -106,8 +109,7 @@ class OperationRequestBuilder {
         queryItems.append(contentsOf: operation.queryItems)
         components.queryItems = queryItems
 
-        guard let url = components.url
-        else {
+        guard let url = components.url else {
             throw Error.URLGenerationFailed
         }
 
