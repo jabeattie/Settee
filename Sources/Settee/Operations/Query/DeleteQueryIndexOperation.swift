@@ -17,22 +17,22 @@
 import Foundation
 
 /**
-	An operation to delete a Query index.
-	
-	Example usage:
-	```
-	let deleteIndex = DeleteQueryIndexOperation(name: "exampleIndexName",
-                                                type: .JSON, 
-                                    designDocumentID: "exampleDesignDoc",
-                                        databaseName: "exampledb"){(response, httpInfo, error) in
-		if error != nil {
-        	// Example: handle an error by printing a message
-        	print("Error")
-    	}
-	}
-
-	client.add(operation: deleteIndex)
-	```
+ An operation to delete a Query index.
+ 
+ Example usage:
+ ```
+ let deleteIndex = DeleteQueryIndexOperation(name: "exampleIndexName",
+ type: .JSON, 
+ designDocumentID: "exampleDesignDoc",
+ databaseName: "exampledb"){(response, httpInfo, error) in
+ if error != nil {
+ // Example: handle an error by printing a message
+ print("Error")
+ }
+ }
+ 
+ client.add(operation: deleteIndex)
+ ```
  */
 public class DeleteQueryIndexOperation: CouchDatabaseOperation, JSONOperation {
     
@@ -43,15 +43,15 @@ public class DeleteQueryIndexOperation: CouchDatabaseOperation, JSONOperation {
         /**
          Represents the json index type.
          */
-        case json = "json"
+        case json
         /**
          Represents the text Index type.
          */
-        case text = "text"
+        case text
     }
     
     /**
-    
+     
      Creates the operation.
      
      - parameter name: the name of the index to delete
@@ -60,7 +60,7 @@ public class DeleteQueryIndexOperation: CouchDatabaseOperation, JSONOperation {
      - parameter databaseName: the name of the database that contains the design document.
      - parameter completionHandler: optional handler to run when the operation completes.
      */
-    public init(name: String, type: Type, designDocumentID: String, databaseName: String, completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
+    public init(name: String, type: Type, designDocumentID: String, databaseName: String, completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
         self.name = name
         self.type = type
         self.designDocumentID = designDocumentID
@@ -68,30 +68,30 @@ public class DeleteQueryIndexOperation: CouchDatabaseOperation, JSONOperation {
         self.completionHandler = completionHandler
     }
     
-    public let completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)?
+    public let completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)?
     public let databaseName: String
-
-	/**
-		The name of the design document which contains the index.
-	 */
-	public let designDocumentID: String
-
-	/**
-		The name of the index to delete.
-	*/
-	public let name: String
-
-	/**
-		The type of index e.g. JSON
-	*/
-	public let type: Type
-
-	public var endpoint: String {
-	 	return "/\(self.databaseName)/_index/\(self.designDocumentID)/\(self.type.rawValue)/\(self.name)"
-	}
-
-	public var  method: String {
-	 	return "DELETE"
-	}
-
+    
+    /**
+     The name of the design document which contains the index.
+     */
+    public let designDocumentID: String
+    
+    /**
+     The name of the index to delete.
+     */
+    public let name: String
+    
+    /**
+     The type of index e.g. JSON
+     */
+    public let type: Type
+    
+    public var endpoint: String {
+        return "/\(self.databaseName)/_index/\(self.designDocumentID)/\(self.type.rawValue)/\(self.name)"
+    }
+    
+    public var  method: String {
+        return "DELETE"
+    }
+    
 }

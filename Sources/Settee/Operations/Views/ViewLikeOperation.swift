@@ -17,7 +17,6 @@
 
 import Foundation
 
-
 // This Can't be defined in the extension or the protocol defining outside for now.
 /**
  Acceptable values for allowing stale views with the `stale` property. To disallow stale views use the default `stale=nil`.
@@ -41,7 +40,7 @@ public enum Stale: CustomStringConvertible {
  Some operations are not strictly a view externally, but internally
  they are effectively a view and have similar parameters.
  */
-public protocol ViewOperation : CouchDatabaseOperation {
+public protocol ViewOperation: CouchDatabaseOperation {
     associatedtype ViewParameter
     
     /**
@@ -158,21 +157,21 @@ public extension ViewOperation {
     }
     
     /** 
-    Generates parameters for the following properties
- 
-    * descending
-    * startKeyDocId
-    * endKeyDocId
-    * inclusiveEnd
-    * limit
-    * skip
-    * includeDocs
-    * conflicts
+     Generates parameters for the following properties
+     
+     * descending
+     * startKeyDocId
+     * endKeyDocId
+     * inclusiveEnd
+     * limit
+     * skip
+     * includeDocs
+     * conflicts
      
      
-    - Note: Implementing types *have* to add parameters which use the `associatedtype` `ViewParameter`
-    */
-    func makeParams() -> [String : String]{
+     - Note: Implementing types *have* to add parameters which use the `associatedtype` `ViewParameter`
+     */
+    func makeParams() -> [String: String] {
         var items: [String: String] = [:]
         
         if let descending = descending {

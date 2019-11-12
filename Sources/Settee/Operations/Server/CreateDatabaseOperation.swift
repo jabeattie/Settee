@@ -22,45 +22,41 @@ import Foundation
  Example usage:
  ```
  let createDB = CreateDatabaseOperation(name: "exampleDB") { (response, info, error) in
-     if let error = error {
-         // handle the error case
-     } else {
-        //handle sucessful creation.
-     }
+ if let error = error {
+ // handle the error case
+ } else {
+ //handle sucessful creation.
+ }
  
  }
  client.add(operation: createDB)
  */
 public class CreateDatabaseOperation: CouchOperation, JSONOperation {
-
+    
     /**
      Creates the operation.
      
      - parameter name: The name of the database this operation will create.
      - parameter completionHandler: optional handler to call when the operation completes.
-    */
-    public init(name: String, completionHandler: ((_ response: [String : Any]?, _ httpInfo: HTTPInfo?, _ error: Error?) -> Void)? = nil) {
+     */
+    public init(name: String, completionHandler: ((_ response: [String: Any]?, _ httpInfo: HTTPInfo?, _ error: Error?) -> Void)? = nil) {
         self.name = name
         self.completionHandler = completionHandler
     }
     
-    public let completionHandler: ((_ response: [String : Any]?, _ httpInfo: HTTPInfo?, _ error: Error?) -> Void)?
+    public let completionHandler: ((_ response: [String: Any]?, _ httpInfo: HTTPInfo?, _ error: Error?) -> Void)?
     
     /**
      The name of the database to create.
      */
     public let name: String
-
-     public var method: String {
-        get {
-            return "PUT"
-        }
-    }
-
+    
+    public var method: String { "PUT" }
+    
     public var endpoint: String {
         get {
             return "/\(self.name)"
         }
     }
-
+    
 }

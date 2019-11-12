@@ -25,16 +25,16 @@ import Foundation
  
  ```
  let read = ReadAttachmentOperation(name: attachmentName, documentID: docID, databaseName: dbName){ (data, info, error) in
-    if let error = error {
-        // handle the error
-    } else {
-        // process the successful response
-    }
+ if let error = error {
+ // handle the error
+ } else {
+ // process the successful response
+ }
  }
  client.add(operation:read)
  ```
  */
- 
+
 public class ReadAttachmentOperation: CouchDatabaseOperation, DataOperation {
     
     /**
@@ -47,7 +47,7 @@ public class ReadAttachmentOperation: CouchDatabaseOperation, DataOperation {
      - parameter completionHAndler: optional handler to run when the operation completes.
      */
     public init(name: String, documentID: String, revision: String? = nil, databaseName: String, completionHandler: ((Data?, HTTPInfo?, Error?) -> Void)? = nil) {
-    
+        
         self.name = name
         self.documentID = documentID
         self.revision = revision
@@ -97,7 +97,5 @@ public class ReadAttachmentOperation: CouchDatabaseOperation, DataOperation {
             return [:]
         }
     }
-    
-    
     
 }

@@ -15,9 +15,7 @@
 //  and limitations under the License.
 //
 
-
 import Foundation
-
 
 /** 
  ViewPager makes it possible to paginate results from a CouchDB view.
@@ -40,12 +38,12 @@ import Foundation
  // Make the first request with a view pager.
  let pager = ViewPager(name: "exampleView", designDocumentID: "example", database: "exampleDB, client: client) { (response, token, error) -> .Page? 
  
-    //process the results
-    if someCondition {
-       return nil // return nil to stop page
-    } else {
-        return .next
-    }
+ //process the results
+ if someCondition {
+ return nil // return nil to stop page
+ } else {
+ return .next
+ }
  
  }
  
@@ -56,12 +54,12 @@ import Foundation
  
  ViewPager.next(token: token) { (response, token, error) -> .Page? in 
  
-    //process the results
-    if someCondition {
-        return nil // return nil to stop requesting pages
-    } else {
-        return .next // to request the next page
-    }
+ //process the results
+ if someCondition {
+ return nil // return nil to stop requesting pages
+ } else {
+ return .next // to request the next page
+ }
  }
  
  // Get the previous page from a string token
@@ -69,18 +67,18 @@ import Foundation
  
  try ViewPager.next(token: strToken) { (response, token, error) -> .Page? in
  
-    //process the results
-    if someCondition {
-        return nil // return nil to stop page
-    } else {
-        return .previous
-    }
+ //process the results
+ if someCondition {
+ return nil // return nil to stop page
+ } else {
+ return .previous
+ }
  }
  ```
  
  - seealso:
  [CouchDB Pagination Recipe](http://docs.couchdb.org/en/stable/couchapp/views/pagination.html)
-*/
+ */
 public class ViewPager {
     /**
      A token which contains all the information required to continue paging for a previous
@@ -92,24 +90,23 @@ public class ViewPager {
         
         fileprivate let descending: Bool?
         fileprivate let startKey: Any?
-        fileprivate let startKeyDocumentID:String?
+        fileprivate let startKeyDocumentID: String?
         fileprivate let endKey: Any?
         fileprivate let endKeyDocumentID: String?
-        fileprivate let inclusiveEnd:Bool?
-        fileprivate let key:Any?
-        fileprivate let keys:[Any]?
-        fileprivate let includeDocs:Bool?
-        fileprivate let conflicts:Bool?
-        fileprivate let stale:Stale?
+        fileprivate let inclusiveEnd: Bool?
+        fileprivate let key: Any?
+        fileprivate let keys: [Any]?
+        fileprivate let includeDocs: Bool?
+        fileprivate let conflicts: Bool?
+        fileprivate let stale: Stale?
         fileprivate let includeLastUpdateSequenceNumber: Bool?
         
         fileprivate let name: String
         fileprivate let designDocumentID: String
-        fileprivate let databaseName:String
-        fileprivate let pageSize:UInt
+        fileprivate let databaseName: String
+        fileprivate let pageSize: UInt
         
         fileprivate let client: SetteeClient
-        
         
         /**
          Creates a serialised version of this token.
@@ -117,64 +114,32 @@ public class ViewPager {
          - throws: An error if serialisation fails.
          
          - returns: A serialised version of this token.
-        */
+         */
         public func serialised() throws -> String {
             
-            var dict:[String: Any] = ["name": name,
-                                        "ddoc": designDocumentID,
-                                        "db": databaseName,
-                                        "page_size": pageSize]
+            var dict: [String: Any] = [
+                "name": name,
+                "ddoc": designDocumentID,
+                "db": databaseName,
+                "page_size": pageSize,
+                "descending": descending,
+                "startkey": startKey,
+                "startkey_docid": startKeyDocumentID,
+                "endkey": endKey,
+                "endkey_docid": endKeyDocumentID,
+                "inclusive_end": inclusiveEnd,
+                "key": key,
+                "keys": keys,
+                "include_docs":  includeDocs,
+                "conflicts": conflicts,
+                "update_seq": includeLastUpdateSequenceNumber,
+                "state": state.dictionary
+            ].compactMapValues({ $0 })
             
-            
-            if let descending = descending {
-                dict["descending"] = descending
-            }
-            if let startKey = startKey {
-                dict["startkey"] = startKey
-            }
-            
-            if let startKeyDocumentID = startKeyDocumentID {
-                dict["startkey_docid"] = startKeyDocumentID
-            }
-            
-            if let endKey = endKey {
-                 dict["endkey"] = endKey
-            }
-            
-            if let endKeyDocumentID = endKeyDocumentID {
-                dict["endkey_docid"] = endKeyDocumentID
-            }
-            
-            if let inclusiveEnd = inclusiveEnd {
-                dict["inclusive_end"] = inclusiveEnd
-            }
-            
-            if let key = key {
-                dict["key"] = key
-            }
-            
-            if let keys = keys {
-                dict["keys"] = keys
-            }
-            
-            if let includeDocs = includeDocs {
-                dict["include_docs" ] = includeDocs
-            }
-            
-            if let conflicts = conflicts {
-                dict["conflicts"] = conflicts
-            }
             
             if let stale = stale {
                 dict["stale" ] = "\(stale)"
             }
-            
-            if let includeLastUpdateSequenceNumber = includeLastUpdateSequenceNumber {
-                dict["update_seq"] = includeLastUpdateSequenceNumber
-            }
-            
-            dict["state"] = state.dictionary
-
             
             let data = try JSONSerialization.data(withJSONObject: dict)
             return data.base64EncodedString()
@@ -182,12 +147,12 @@ public class ViewPager {
         
         fileprivate static func from(_ string: String, with client: SetteeClient) throws -> Token {
             guard let data = Data(base64Encoded: string),
-            let dict = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                let dict = try JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
                     throw Error.deseralisationFailure
             }
             
-            let stateDict = dict["state"] as! [String: Any]
+            let stateDict = dict["state"] as? [String: Any] ?? [:]
             let state = State.from(stateDict)
             
             let stale: Stale?
@@ -209,7 +174,7 @@ public class ViewPager {
             return Token(state: state,
                          descending: dict["descending"] as? Bool,
                          startKey: dict["startkey"],
-                         startKeyDocumentID:  dict["startkey_docid"] as? String,
+                         startKeyDocumentID: dict["startkey_docid"] as? String,
                          endKey: dict["endkey"],
                          endKeyDocumentID: dict["endkey_docid"] as? String,
                          inclusiveEnd: dict["inclusive_end"] as? Bool,
@@ -251,7 +216,7 @@ public class ViewPager {
     /**
      The errors that can be thrown when serialising and deserialising the token.
      */
-    public enum Error : Swift.Error {
+    public enum Error: Swift.Error {
         /** An error occurred serialising the token **/
         case seralisationFailure
         /** An error occurred deserialising the token **/
@@ -272,40 +237,26 @@ public class ViewPager {
         
         fileprivate var dictionary: [String: Any] {
             get {
-                var dict: [String: Any] = [:]
-                if let lastEndKey = lastEndKey {
-                    dict["last_endkey"] = lastEndKey
-                }
-                
-                if let lastEndKeyDocID = lastEndKeyDocID {
-                    dict["last_endkey_docid"] = lastEndKeyDocID
-                }
-                
-                if let lastStartKey = lastStartKey {
-                    dict["last_startkey"] = lastStartKey
-                }
-                
-                if let lastStartKeyDocID = lastStartKeyDocID {
-                    dict["last_startkey_docid"] = lastStartKeyDocID
-                }
-                if let lastPageDirection = lastPageDirection {
-                    dict["last_page"] = lastPageDirection.rawValue
-                }
-                
-                return dict
+                [
+                    "last_endkey": lastEndKey,
+                    "last_endkey_docid": lastEndKeyDocID,
+                    "last_startkey": lastStartKey,
+                    "last_startkey_docid": lastStartKeyDocID,
+                    "last_page": lastPageDirection?.rawValue
+                ]
+                    .compactMapValues { $0 }
             }
         }
         
-        fileprivate static func from(_ dict: [String:Any]) -> State {
+        fileprivate static func from(_ dict: [String: Any]) -> State {
             let lastPage: Page?
             switch dict["last_page"] as! String {
-                case "next":
-                    lastPage = .next
-                    break
-                case "previous" :
-                    lastPage = .previous
-                default:
-                    lastPage = nil
+            case "next":
+                lastPage = .next
+            case "previous" :
+                lastPage = .previous
+            default:
+                lastPage = nil
             }
             return State(lastEndKey: dict["last_endkey"],
                          lastEndKeyDocID: dict["last_endkey_docid"] as? String,
@@ -315,7 +266,7 @@ public class ViewPager {
         }
     }
     
-    private let pageHandler: ([String : Any]?,Token?,Swift.Error?) -> Page?
+    private let pageHandler: ([String: Any]?, Token?, Swift.Error?) -> Page?
     
     private let rowHandler: (([String: Any]) -> Void)?
     
@@ -326,28 +277,27 @@ public class ViewPager {
     /// MARK: User provided parameters for the view Op.
     private let descending: Bool?
     private let startKey: Any?
-    private let startKeyDocumentID:String?
+    private let startKeyDocumentID: String?
     private let endKey: Any?
     private let endKeyDocumentID: String?
-    private let inclusiveEnd:Bool?
-    private let key:Any?
-    private let keys:[Any]?
-    private let includeDocs:Bool?
-    private let conflicts:Bool?
-    private let stale:Stale?
+    private let inclusiveEnd: Bool?
+    private let key: Any?
+    private let keys: [Any]?
+    private let includeDocs: Bool?
+    private let conflicts: Bool?
+    private let stale: Stale?
     private let includeLastUpdateSequenceNumber: Bool?
     
     private let name: String
     private let designDocumentID: String
-    private let databaseName:String
+    private let databaseName: String
     
     /// MARK: state properties for generating the next page etc.
     private var state: State = State()
     
-    
     /**
      Creates a view pager
-    
+     
      - parameter name:                            The name of the view
      - parameter designDocumentID:                The ID of the design document (without _design/ prefix) which contains the view.
      - parameter databaseName:                    The name of the database that contains the view.
@@ -368,30 +318,30 @@ public class ViewPager {
      - parameter rowHandler:                      A closure to call for each row in the response.
      - parameter pageHandler:                     A closure to call for each response from the server. Returning `nil` instead of a `ViewPager.Page`
      will result in the view pager stop paging through results.
-    
+     
      - seeAlso:
-        QueryViewOperation for full details on the parameters that can be passed to a view.
+     QueryViewOperation for full details on the parameters that can be passed to a view.
      
      */
     public init(name: String,
                 designDocumentID: String,
-                databaseName:String,
+                databaseName: String,
                 client: SetteeClient,
                 pageSize: UInt = 25,
                 descending: Bool? = nil,
                 startKey: Any? = nil,
-                startKeyDocumentID:String? = nil,
+                startKeyDocumentID: String? = nil,
                 endKey: Any? = nil,
                 endKeyDocumentID: String? = nil,
-                inclusiveEnd:Bool? = nil,
-                key:Any? = nil,
-                keys:[Any]? = nil,
-                includeDocs:Bool? = nil,
-                conflicts:Bool? = nil,
-                stale:Stale? = nil,
+                inclusiveEnd: Bool? = nil,
+                key: Any? = nil,
+                keys: [Any]? = nil,
+                includeDocs: Bool? = nil,
+                conflicts: Bool? = nil,
+                stale: Stale? = nil,
                 includeLastUpdateSequenceNumber: Bool? = nil,
-                rowHandler:(([String: Any]) -> Void)? = nil,
-                pageHandler: @escaping ([String : Any]?,Token?,Swift.Error?) -> Page?) {
+                rowHandler: (([String: Any]) -> Void)? = nil,
+                pageHandler: @escaping ([String: Any]?, Token?, Swift.Error?) -> Page?) {
         
         self.name = name
         self.designDocumentID = designDocumentID
@@ -421,7 +371,6 @@ public class ViewPager {
         self.makeRequest(page: nil)
     }
     
-
     /**
      Makes a query view request.
      
@@ -437,8 +386,8 @@ public class ViewPager {
         let inclusiveEnd: Bool?
         
         if let page = page {
-
-            switch (page){
+            
+            switch (page) {
             case .next where self.state.lastPageDirection == .next || self.state.lastPageDirection == nil:
                 startKey = self.state.lastEndKey
                 startKeyDocumentID = self.state.lastEndKeyDocID
@@ -446,7 +395,6 @@ public class ViewPager {
                 endKeyDocumentID = self.endKeyDocumentID
                 descending = self.descending
                 inclusiveEnd = self.inclusiveEnd
-                break
             case .previous:
                 startKey = self.state.lastStartKey
                 startKeyDocumentID = self.state.lastStartKeyDocID
@@ -454,8 +402,6 @@ public class ViewPager {
                 endKeyDocumentID = self.startKeyDocumentID
                 descending = self.descending == nil ? true : nil
                 inclusiveEnd = true
-                break
-                
             case .next where self.state.lastPageDirection == .previous:
                 startKey = self.state.lastStartKey
                 startKeyDocumentID = self.state.lastStartKeyDocID
@@ -463,11 +409,8 @@ public class ViewPager {
                 endKeyDocumentID = self.endKeyDocumentID
                 descending = self.descending
                 inclusiveEnd = self.inclusiveEnd
-                break
-                
             default:
                 abort() // aborting for now, when this is finished we should never hit this.
-                break
             }
             self.state.lastPageDirection = page
         } else {
@@ -499,50 +442,49 @@ public class ViewPager {
                                         conflicts: conflicts,
                                         reduce: false,
                                         stale: stale,
-                                        includeLastUpdateSequenceNumber: includeLastUpdateSequenceNumber)
-        { (response, httpInfo, error) in
-                if let response = response, let rows = response["rows"] as? [[String: Any]] {
-                    
-                    let filteredRows: [[String: Any]]
-                    
-                    if let last = rows.last {
-                        self.state.lastEndKey = last["key"]
-                        self.state.lastEndKeyDocID = last["id"] as? String
-                    }
-                    
-                    if let first = rows.first {
-                        self.state.lastStartKey = first["key"]
-                        self.state.lastStartKeyDocID = first["id"] as? String
-                    }
-                    
-                    // we should only filter last if we are going forward, if backwards we need to filter the first.
-                    if rows.count > Int(self.pageSize) {
-                        if page == .next || page == nil {
-                            filteredRows = Array(rows.dropLast())
-                        } else {
-                            filteredRows = Array(rows.dropFirst()).reversed()
-                        }
-                    } else {
-                        filteredRows = rows
-                    }
-                    
-                    // call the row handler.
-                    for row in filteredRows {
-                        self.rowHandler?(row)
-                    }
-                    
-                    var requestedResponse = response
-                    requestedResponse["rows"] = filteredRows
-                    
-                    if let returned = self.pageHandler(requestedResponse, self.makeToken(), error) {
-                        self.makeRequest(page: returned)
-                    }
-                    
-                } else {
-                    if let _ =  self.pageHandler(nil, self.makeToken(), error) {
-                        print("Next and previous states not allowed")
-                    }
+                                        includeLastUpdateSequenceNumber: includeLastUpdateSequenceNumber) { (response, _, error) in
+            if let response = response, let rows = response["rows"] as? [[String: Any]] {
+                
+                let filteredRows: [[String: Any]]
+                
+                if let last = rows.last {
+                    self.state.lastEndKey = last["key"]
+                    self.state.lastEndKeyDocID = last["id"] as? String
                 }
+                
+                if let first = rows.first {
+                    self.state.lastStartKey = first["key"]
+                    self.state.lastStartKeyDocID = first["id"] as? String
+                }
+                
+                // we should only filter last if we are going forward, if backwards we need to filter the first.
+                if rows.count > Int(self.pageSize) {
+                    if page == .next || page == nil {
+                        filteredRows = Array(rows.dropLast())
+                    } else {
+                        filteredRows = Array(rows.dropFirst()).reversed()
+                    }
+                } else {
+                    filteredRows = rows
+                }
+                
+                // call the row handler.
+                for row in filteredRows {
+                    self.rowHandler?(row)
+                }
+                
+                var requestedResponse = response
+                requestedResponse["rows"] = filteredRows
+                
+                if let returned = self.pageHandler(requestedResponse, self.makeToken(), error) {
+                    self.makeRequest(page: returned)
+                }
+                
+            } else {
+                if let _ =  self.pageHandler(nil, self.makeToken(), error) {
+                    print("Next and previous states not allowed")
+                }
+            }
         }
         
         client.add(operation: viewOp)
@@ -551,23 +493,23 @@ public class ViewPager {
     
     private func makeToken() -> Token {
         return Token(state: self.state,
-                         descending: self.descending,
-                         startKey: self.startKey,
-                         startKeyDocumentID: self.startKeyDocumentID,
-                         endKey: self.endKey,
-                         endKeyDocumentID: self.endKeyDocumentID,
-                         inclusiveEnd: self.inclusiveEnd,
-                         key: self.key,
-                         keys: self.keys,
-                         includeDocs: self.includeDocs,
-                         conflicts: self.conflicts,
-                         stale: self.stale,
-                         includeLastUpdateSequenceNumber: self.includeLastUpdateSequenceNumber,
-                         name: self.name,
-                         designDocumentID: self.designDocumentID,
-                         databaseName: self.databaseName,
-                         pageSize: self.pageSize,
-                         client: self.client)
+                     descending: self.descending,
+                     startKey: self.startKey,
+                     startKeyDocumentID: self.startKeyDocumentID,
+                     endKey: self.endKey,
+                     endKeyDocumentID: self.endKeyDocumentID,
+                     inclusiveEnd: self.inclusiveEnd,
+                     key: self.key,
+                     keys: self.keys,
+                     includeDocs: self.includeDocs,
+                     conflicts: self.conflicts,
+                     stale: self.stale,
+                     includeLastUpdateSequenceNumber: self.includeLastUpdateSequenceNumber,
+                     name: self.name,
+                     designDocumentID: self.designDocumentID,
+                     databaseName: self.databaseName,
+                     pageSize: self.pageSize,
+                     client: self.client)
     }
     
     /**
@@ -577,10 +519,10 @@ public class ViewPager {
      - parameter rowHandler: A closure to run for each row for the page.
      - parameter pageHandler: A clousre to run when the page is retrieved from the server. The `pageHandler`
      returning `nil` will indicate that the `ViewPager` should not make any more requests.
-    */
+     */
     public class func next(token: Token,
-                           rowHandler:(([String: Any]) -> Void)? = nil,
-                           pageHandler: @escaping ([String : Any]?, Token?, Swift.Error?) -> Page?) {
+                           rowHandler: (([String: Any]) -> Void)? = nil,
+                           pageHandler: @escaping ([String: Any]?, Token?, Swift.Error?) -> Page?) {
         
         ViewPager.makePage(token: token, page: .next, rowHandler: rowHandler, pageHandler: pageHandler)
         
@@ -595,8 +537,8 @@ public class ViewPager {
      returning `nil` will indicate that the `ViewPager` should not make any more requests.
      */
     public class func previous(token: Token,
-                               rowHandler:(([String: Any]) -> Void)? = nil,
-                               pageHandler: @escaping ([String : Any]?, Token?, Swift.Error?) -> Page?){
+                               rowHandler: (([String: Any]) -> Void)? = nil,
+                               pageHandler: @escaping ([String: Any]?, Token?, Swift.Error?) -> Page?) {
         ViewPager.makePage(token: token, page: .previous, rowHandler: rowHandler, pageHandler: pageHandler)
     }
     
@@ -611,8 +553,8 @@ public class ViewPager {
      */
     public class func next(token: String,
                            client: SetteeClient,
-                           rowHandler:(([String: Any]) -> Void)? = nil,
-                           pageHandler: @escaping ([String : Any]?, Token?, Swift.Error?) -> Page?) throws {
+                           rowHandler: (([String: Any]) -> Void)? = nil,
+                           pageHandler: @escaping ([String: Any]?, Token?, Swift.Error?) -> Page?) throws {
         let token = try Token.from(token, with: client)
         ViewPager.next(token: token, rowHandler: rowHandler, pageHandler: pageHandler)
     }
@@ -628,49 +570,41 @@ public class ViewPager {
      */
     public class func previous(token: String,
                                client: SetteeClient,
-                               rowHandler:(([String: Any]) -> Void)? = nil,
-                               pageHandler: @escaping ([String : Any]?, Token?, Swift.Error?) -> Page?) throws {
+                               rowHandler: (([String: Any]) -> Void)? = nil,
+                               pageHandler: @escaping ([String: Any]?, Token?, Swift.Error?) -> Page?) throws {
         let token = try Token.from(token, with: client)
         ViewPager.previous(token: token, rowHandler: rowHandler, pageHandler: pageHandler)
     }
     
     private class func makePage(token: Token,
-                                  page:Page,
-                                  rowHandler:(([String: Any]) -> Void)?,
-                                  pageHandler: @escaping ([String : Any]?, Token?, Swift.Error?) -> Page?) {
+                                page: Page,
+                                rowHandler: (([String: Any]) -> Void)?,
+                                pageHandler: @escaping ([String: Any]?, Token?, Swift.Error?) -> Page?) {
         let viewPage = ViewPager(name: token.name,
-                            designDocumentID: token.designDocumentID,
-                            databaseName: token.databaseName,
-                            client: token.client,
-                            pageSize: token.pageSize,
-                            descending: token.descending,
-                            startKey: token.startKey,
-                            startKeyDocumentID: token.startKeyDocumentID,
-                            endKey: token.endKey,
-                            endKeyDocumentID: token.endKeyDocumentID,
-                            inclusiveEnd: token.inclusiveEnd,
-                            key: token.key,
-                            keys: token.keys,
-                            includeDocs: token.includeDocs,
-                            conflicts: token.conflicts,
-                            stale: token.stale,
-                            includeLastUpdateSequenceNumber: token.includeLastUpdateSequenceNumber,
-                            rowHandler: rowHandler,
-                            pageHandler: pageHandler)
+                                 designDocumentID: token.designDocumentID,
+                                 databaseName: token.databaseName,
+                                 client: token.client,
+                                 pageSize: token.pageSize,
+                                 descending: token.descending,
+                                 startKey: token.startKey,
+                                 startKeyDocumentID: token.startKeyDocumentID,
+                                 endKey: token.endKey,
+                                 endKeyDocumentID: token.endKeyDocumentID,
+                                 inclusiveEnd: token.inclusiveEnd,
+                                 key: token.key,
+                                 keys: token.keys,
+                                 includeDocs: token.includeDocs,
+                                 conflicts: token.conflicts,
+                                 stale: token.stale,
+                                 includeLastUpdateSequenceNumber: token.includeLastUpdateSequenceNumber,
+                                 rowHandler: rowHandler,
+                                 pageHandler: pageHandler)
         viewPage.state.lastEndKey = token.state.lastEndKey
         viewPage.state.lastEndKeyDocID = token.state.lastEndKeyDocID
         viewPage.state.lastStartKey = token.state.lastStartKey
         viewPage.state.lastStartKeyDocID = token.state.lastStartKeyDocID
         viewPage.state.lastPageDirection = token.state.lastPageDirection
         
-        
         viewPage.makeRequest(page: page)
     }
-    
-    
-    
 }
-
-
-
-

@@ -23,7 +23,7 @@ import Foundation
 public protocol CouchDatabaseOperation: CouchOperation {
     
     /**
-        The name of the database that the operation will be operating on.
-    */
+     The name of the database that the operation will be operating on.
+     */
     var databaseName: String { get }
 }

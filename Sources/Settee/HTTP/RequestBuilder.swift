@@ -11,7 +11,7 @@ import Foundation
 /**
  Designates an operation which provides data to perform a HTTP Request.
  */
-internal protocol HTTPRequestOperation   {
+internal protocol HTTPRequestOperation {
 
     /**
      The root of url, e.g. `example.cloudant.com`
@@ -58,7 +58,7 @@ internal protocol HTTPRequestOperation   {
      - parameter httpInfo: Information about the HTTP response.
      - parameter error: A type representing an error if one occurred or `nil`
      */
-    func processResponse(data: Data?, httpInfo: HTTPInfo?, error: Error?);
+    func processResponse(data: Data?, httpInfo: HTTPInfo?, error: Error?)
 
     var isCancelled: Bool { get }
 
@@ -128,4 +128,3 @@ class OperationRequestBuilder {
     }
 
 }
-

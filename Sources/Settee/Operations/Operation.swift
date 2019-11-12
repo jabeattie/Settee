@@ -10,8 +10,7 @@ import Foundation
 /**
  An NSOperation subclass for executing `CouchOperations`
  */
-public class Operation: Foundation.Operation, HTTPRequestOperation
-{
+public class Operation: Foundation.Operation, HTTPRequestOperation {
     
     /**
      A enum of errors which could be returned.
@@ -31,7 +30,7 @@ public class Operation: Foundation.Operation, HTTPRequestOperation
          An unexpected HTTP status code (e.g. 4xx or 5xx) was received.
          */
         case http(statusCode: Int, response: String?)
-    };
+    }
     
     private let couchOperation: CouchOperation
     
@@ -43,7 +42,6 @@ public class Operation: Foundation.Operation, HTTPRequestOperation
     public init(couchOperation: CouchOperation) {
         self.couchOperation = couchOperation
     }
-    
     
     // NS operation property overrides
     private var mExecuting: Bool = false
@@ -59,7 +57,7 @@ public class Operation: Foundation.Operation, HTTPRequestOperation
             }
         }
     }
-
+    
     private var mFinished: Bool = false
     override public var isFinished: Bool {
         get {
@@ -73,60 +71,52 @@ public class Operation: Foundation.Operation, HTTPRequestOperation
             }
         }
     }
-
-    override public var isAsynchronous: Bool {
-        get {
-            return true
-        }
-    }
-
-    var mSession: InterceptableSession? = nil
+    
+    override public var isAsynchronous: Bool { true }
+    
+    var mSession: InterceptableSession?
     internal var session: InterceptableSession {
-        get {
-            if let session = mSession {
-                return session
-            } else {
-                mSession = InterceptableSession()
-                return mSession!
-            }
+        if let session = mSession {
+            return session
+        } else {
+            mSession = InterceptableSession()
+            return mSession!
         }
     }
-
+    
     internal var rootURL: URL = URL(string: "http://cloudant.invalid")!
-
+    
     internal var httpPath: String {
         return couchOperation.endpoint
     }
     internal var httpMethod: String {
         return couchOperation.method
     }
-
+    
     internal var queryItems: [URLQueryItem] {
-        get {
-            var items:[URLQueryItem] = []
-            
-            for (key, value) in couchOperation.parameters {
-                items.append(URLQueryItem(name: key, value: value))
-            }
-            return items
+        var items: [URLQueryItem] = []
+        
+        for (key, value) in couchOperation.parameters {
+            items.append(URLQueryItem(name: key, value: value))
         }
+        return items
     }
-
+    
     internal var httpContentType: String {
         return couchOperation.contentType
     }
-
+    
     // return nil if there is no body
     internal var httpRequestBody: Data? {
         return couchOperation.data
     }
-
-    internal var executor: OperationRequestExecutor? = nil
-
+    
+    internal var executor: OperationRequestExecutor?
+    
     internal func processResponse(data: Data?, httpInfo: HTTPInfo?, error: Swift.Error?) {
         couchOperation.processResponse(data: data, httpInfo: httpInfo, error: error)
     }
-
+    
     final override public func start() {
         do {
             // Always check for cancellation before launching the task
@@ -134,15 +124,15 @@ public class Operation: Foundation.Operation, HTTPRequestOperation
                 isFinished = true
                 return
             }
-
+            
             if !couchOperation.validate() {
                 couchOperation.callCompletionHandler(error: Error.validationFailed)
                 isFinished = true
                 return
             }
-
+            
             try couchOperation.serialise()
-
+            
             // start the operation
             isExecuting = true
             executor = OperationRequestExecutor(operation: self)
@@ -152,16 +142,16 @@ public class Operation: Foundation.Operation, HTTPRequestOperation
             isFinished = true
         }
     }
-
+    
     final public func completeOperation() {
         self.executor = nil // break the cycle.
         self.isExecuting = false
         self.isFinished = true
     }
-
+    
     final override public func cancel() {
         super.cancel()
         self.executor?.cancel()
     }
-
+    
 }

@@ -23,11 +23,11 @@ import Foundation
  
  ```
  let create = PutDocumentOperation(id: "example", body: ["hello":"world"], databaseName: "exampleDB") { (response, httpInfo, error) in 
-    if let error = error {
-        // handle the error
-    } else {
-        // successfull request.
-    }
+ if let error = error {
+ // handle the error
+ } else {
+ // successfull request.
+ }
  }
  ```
  
@@ -43,8 +43,8 @@ public class PutDocumentOperation: CouchDatabaseOperation, JSONOperation {
      - parameter databaseName: the name of the database where the document will be created / updated.
      - parameter completionHandler: optional handler to run when the operation completes.
      */
-    public init(id: String? = nil, revision: String? = nil, body: [String: Any], databaseName:String, completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
-        self.id = id;
+    public init(id: String? = nil, revision: String? = nil, body: Document, databaseName: String, completionHandler: ((Document?, HTTPInfo?, Error?) -> Void)? = nil) {
+        self.id = id
         self.revision = revision
         self.body = body
         self.databaseName = databaseName
@@ -52,64 +52,56 @@ public class PutDocumentOperation: CouchDatabaseOperation, JSONOperation {
         
     }
     
-    public let completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)?
-    
+    public let completionHandler: ((Document?, HTTPInfo?, Error?) -> Void)?
     
     public let databaseName: String
     /**
      The document that this operation will modify.
      */
     public let id: String?
-
+    
     /**
      The revision of the document being updated or `nil` if this operation is creating a document.
      */
     public let revision: String?
-
+    
     /** Body of document. Must be serialisable with NSJSONSerialization */
-    public let body: [String: Any]
-
+    public let body: Document
+    
     public func validate() -> Bool {
         return JSONSerialization.isValidJSONObject(body)
     }
-
+    
     public var method: String {
-        get {
-            if let _ = id {
-                return "PUT"
-            } else {
-                return "POST"
-            }
-        }
-    }
-
-    public private(set) var data: Data?
-
-    public var endpoint: String {
-        get {
-            if let id = id {
-                return "/\(self.databaseName)/\(id)"
-            } else {
-                return "/\(self.databaseName)"
-            }
-        }
-        
-    }
-
-    public var parameters: [String: String] {
-        get {
-            var items:[String:String] = [:]
-
-            if let revision = revision {
-                items["rev"] = revision
-            }
-            
-            return items
+        if let _ = id {
+            return "PUT"
+        } else {
+            return "POST"
         }
     }
     
-    public func serialise() throws {
-        data = try JSONSerialization.data(withJSONObject: body)
+    public private(set) var data: Data?
+    
+    public var endpoint: String {
+        if let id = id {
+            return "/\(self.databaseName)/\(id)"
+        } else {
+            return "/\(self.databaseName)"
+        }
     }
-
+    
+    public var parameters: [String: String] {
+        var items: [String: String] = [:]
+        
+        if let revision = revision {
+            items["rev"] = revision
+        }
+        
+        return items
+    }
+    
+    public func serialise() throws {
+        data = try JSONSerialization.data(withJSONObject: body.toDictionary())
+    }
+    
 }

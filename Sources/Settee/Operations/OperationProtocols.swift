@@ -33,7 +33,6 @@ public protocol CouchOperation {
      */
     var data: Data? { get }
     
-    
     /**
      The content type of the data to send to the CouchDB endpoint. This is guaranteed to be called
      if and only if `data` is not `nil`
@@ -44,10 +43,10 @@ public protocol CouchOperation {
      Calls the completionHandler for this operation.
      
      - parameter response: The response received from the server, this should be one of the following types,
-    an `Array`/`NSArray`, `Dictionary`/`NSDictionary` or Data.
+     an `Array`/`NSArray`, `Dictionary`/`NSDictionary` or Data.
      - parameter httpInfo: Information about the HTTP response.
      - parameter error: The error that occurred, or nil if the request was made successfully.
-    */
+     */
     func callCompletionHandler(response: Any?, httpInfo: HTTPInfo?, error: Swift.Error?)
     
     /**
@@ -65,7 +64,6 @@ public protocol CouchOperation {
      */
     func processResponse(json: Any)
     
-    
     /**
      Processes the response from CouchDB. This is required to call the following
      methods in the lifecycle of the function when the given circumstances arise:
@@ -73,7 +71,7 @@ public protocol CouchOperation {
      * callCompletionHandler(error:) when the processing of the response has completed with an error.
      * callCompletionHandler(response:httpInfo:error:) when the processing of the response has completed.
      * processResponse(json:) when a 2xx response code was received and the response is a JSON response.
-       This allows an operation to provide additional processing of the JSON.
+     This allows an operation to provide additional processing of the JSON.
      */
     func processResponse(data: Data?, httpInfo: HTTPInfo?, error: Swift.Error?)
     
@@ -122,14 +120,14 @@ public extension CouchOperation {
 }
 
 /**
-    Marks an operation as a JSON Operation. It will provide response
-    processing for operations.
+ Marks an operation as a JSON Operation. It will provide response
+ processing for operations.
  */
 public protocol JSONOperation: CouchOperation {
     
     /**
      The Json type that is expected. This should only be a type that can be returned from `NSJSONSeralization`
-    */
+     */
     associatedtype Json
     
     /**
@@ -163,7 +161,7 @@ public extension JSONOperation {
                     self.callCompletionHandler(response: json, httpInfo: httpInfo, error: error)
                 } else {
                     let error = Operation.Error.http(statusCode: httpInfo.statusCode,
-                                            response: String(data: data, encoding: .utf8))
+                                                     response: String(data: data, encoding: .utf8))
                     self.callCompletionHandler(response: json, httpInfo: httpInfo, error: error as Error)
                 }
             } else {
@@ -216,7 +214,3 @@ public extension DataOperation {
         }
     }
 }
-
-
-
-

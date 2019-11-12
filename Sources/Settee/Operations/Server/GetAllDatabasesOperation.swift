@@ -23,19 +23,18 @@ import Foundation
  Example usage:
  ```
  let allDbs = GetAllDatabasesOperation(
-    databaseHandler: { (databaseName) in
-    // do something for the database name
+ databaseHandler: { (databaseName) in
+ // do something for the database name
  }) { (response, httpInfo, error) in
-    if let error = error {
-        // handle the error case
-    }
-    // process the response information
+ if let error = error {
+ // handle the error case
+ }
+ // process the response information
  }
  
  */
-public class GetAllDatabasesOperation : CouchOperation, JSONOperation {
+public class GetAllDatabasesOperation: CouchOperation, JSONOperation {
     public typealias Json = [Any]
-
     
     /**
      
@@ -45,16 +44,16 @@ public class GetAllDatabasesOperation : CouchOperation, JSONOperation {
      - parameter completionHander: optional handler to call when the operation completes.
      */
     public init(databaseHandler: ((_ databaseName: String) -> Void)? = nil,
-        completionHandler:(([Any]?, HTTPInfo?,Error?) -> Void)? = nil) {
-    
+                completionHandler: (([Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
+        
         self.databaseHandler = databaseHandler
         self.completionHandler = completionHandler
     }
     
     /**
-        Handler to run for each database returned.
+     Handler to run for each database returned.
      
-        - parameter databaseName: the name of a database on the server.
+     - parameter databaseName: the name of a database on the server.
      */
     public let databaseHandler: ((_ databaseName: String) -> Void)?
     

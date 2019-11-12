@@ -23,14 +23,14 @@ import Foundation
  Example usage:
  ```
  let deleteAttachment = DeleteAttachmentOperation(name: "myAwesomeAttachment",
-                                            documentID: "exampleDocId",
-                                             revision: "1-arevision",
-                                          databaseName: "exampledb"){(response, info, error) in
-    if let error = error {
-    // handle the error
-    } else {
-    // process successful response
-    }
+ documentID: "exampleDocId",
+ revision: "1-arevision",
+ databaseName: "exampledb"){(response, info, error) in
+ if let error = error {
+ // handle the error
+ } else {
+ // process successful response
+ }
  }
  client.add(operation: deleteAttachment)
  ```
@@ -39,16 +39,16 @@ import Foundation
 public class DeleteAttachmentOperation: CouchDatabaseOperation, JSONOperation {
     
     /**
-    
+     
      Creates the operation
-    
+     
      - parameter name : The name of the attachment to delete
      - parameter documentID : the ID of the document that the attachment is attached to.
      - parameter revision : the revision of the document that the attachment is attached to.
      - parameter databaseName : the name of the database that the contains the attachment.
      - parameter completionHandler: optional handler to run when the operation completes.
      */
-    public init(name: String, documentID: String, revision: String, databaseName: String, completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
+    public init(name: String, documentID: String, revision: String, databaseName: String, completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
         self.name = name
         self.documentID = documentID
         self.revision = revision
@@ -58,7 +58,7 @@ public class DeleteAttachmentOperation: CouchDatabaseOperation, JSONOperation {
     
     public let databaseName: String
     
-    public let completionHandler: (( [String : Any]?, HTTPInfo?, Error?) -> Void)?
+    public let completionHandler: (( [String: Any]?, HTTPInfo?, Error?) -> Void)?
     
     /**
      The ID of the document that the attachment is attached to.

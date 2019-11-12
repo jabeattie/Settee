@@ -24,43 +24,43 @@ import Foundation
  ```
  let deleteDB = DeleteDatabaseOperation(name: "exampleDB") { (response, httpInfo, error) in 
  
-    if let error = error {
-        // handle the error
-    } else {
-        // check the response code to determine if the operaton was successful.
-    }
+ if let error = error {
+ // handle the error
+ } else {
+ // check the response code to determine if the operaton was successful.
+ }
  }
  */
 public class DeleteDatabaseOperation: CouchOperation, JSONOperation {
-
+    
     /**
      Creates the operation
      
      - parameter name: the name of the database to delete.
      - completionHandler: optional handler to reun when the operation completes.
      */
-    public init(name: String, completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
-        self.name = name;
+    public init(name: String, completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
+        self.name = name
         self.completionHandler = completionHandler
     }
     
-    public let completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)?
+    public let completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)?
     
     /**
      The name of the database to delete.
      */
     public let name: String
-
-     public var method: String {
+    
+    public var method: String {
         get {
             return "DELETE"
         }
     }
-
-     public var endpoint: String {
+    
+    public var endpoint: String {
         get {
             return "/\(self.name)"
         }
     }
-
+    
 }

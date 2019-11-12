@@ -24,17 +24,17 @@ import Foundation
  ```
  let attachment = "This is my awesome essay attachment for my document"
  let putAttachment = PutAttachmentOperation(name: "myAwsomeAttachment",
-                                     contentType: "text/plain",
-                                            data: attachment.data(using: .utf8, allowLossyConversion: false)
-                                      documentID: docId
-                                           revID: revID
-                                    databaseName: "exampledb") {(response, info, error) in
-                                                                        if let error = error {
-                                                                            // handle the error
-                                                                        } else {
-                                                                            // process successful response
-                                                                        }
-                                                                }
+ contentType: "text/plain",
+ data: attachment.data(using: .utf8, allowLossyConversion: false)
+ documentID: docId
+ revID: revID
+ databaseName: "exampledb") {(response, info, error) in
+ if let error = error {
+ // handle the error
+ } else {
+ // process successful response
+ }
+ }
  client.add(operation: putAttachment)
  ```
  
@@ -52,8 +52,8 @@ public class PutAttachmentOperation: CouchDatabaseOperation, JSONOperation {
      - parameter databaseName: The name of the database that the document is stored in.
      - parameter completionHandler: optional handler to run when the operation completes.
      */
-    public init(name: String, contentType: String, data: Data, documentID: String, revision: String, databaseName: String, completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
-    
+    public init(name: String, contentType: String, data: Data, documentID: String, revision: String, databaseName: String, completionHandler: ((Document?, HTTPInfo?, Error?) -> Void)? = nil) {
+        
         self.name = name
         self.documentID = documentID
         self.revision = revision
@@ -65,7 +65,7 @@ public class PutAttachmentOperation: CouchDatabaseOperation, JSONOperation {
     }
     
     public let databaseName: String
-    public let completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)?
+    public let completionHandler: ((Document?, HTTPInfo?, Error?) -> Void)?
     
     /**
      The id of the document that the attachment should be attached to.
@@ -75,7 +75,7 @@ public class PutAttachmentOperation: CouchDatabaseOperation, JSONOperation {
     
     /**
      The revision of the document that the attachment should be attached to.
-    */
+     */
     public let revision: String
     
     /**
@@ -85,7 +85,7 @@ public class PutAttachmentOperation: CouchDatabaseOperation, JSONOperation {
     
     /**
      The attachment's data.
-    */
+     */
     public let data: Data?
     
     /**

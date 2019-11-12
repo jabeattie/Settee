@@ -6,20 +6,20 @@ import Foundation
  Example usage:
  ```
  let changes = GetChangesOperation(dbName: "exampleDB", changeHandler: {(change) in
-    // do something for each change.
+ // do something for each change.
  }) { (response, info, error) in
-    if let error = error {
-        // handle the error
-    } else {
-        // process the changes feed result.
-    }
+ if let error = error {
+ // handle the error
+ } else {
+ // process the changes feed result.
+ }
  }
  ```
  */
-public class GetChangesOperation : CouchDatabaseOperation, JSONOperation {
+public class GetChangesOperation: CouchDatabaseOperation, JSONOperation {
     
     public typealias Json = [String: Any]
-
+    
     /**
      Abstract representation of a CouchDB Sequence. No assumptions should be
      made about the concrete type that is returned from the server, it should be used
@@ -30,7 +30,7 @@ public class GetChangesOperation : CouchDatabaseOperation, JSONOperation {
     /**
      The style of changes feed that should be requested.
      */
-    public enum Style : String {
+    public enum Style: String {
         /**
          Only the "winning" revision.
          */
@@ -61,7 +61,7 @@ public class GetChangesOperation : CouchDatabaseOperation, JSONOperation {
     public let descending: Bool?
     
     /**
-      The filter function to use to filter the feed.
+     The filter function to use to filter the feed.
      */
     public let filter: String?
     
@@ -123,8 +123,8 @@ public class GetChangesOperation : CouchDatabaseOperation, JSONOperation {
      - param changeHandler: A handler to call for each change returned from the server.
      - param completionHander: A handler to call when the operation has compeleted.
      */
-    public init(databaseName:String,
-                docIDs:[String]? = nil,
+    public init(databaseName: String,
+                docIDs: [String]? = nil,
                 conflicts: Bool? = nil,
                 descending: Bool? = nil,
                 filter: String? = nil,
@@ -136,7 +136,7 @@ public class GetChangesOperation : CouchDatabaseOperation, JSONOperation {
                 style: Style? = nil,
                 view: String? = nil,
                 changeHandler: (([String: Any]) -> Void)? = nil,
-                completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)? = nil){
+                completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
         self.databaseName = databaseName
         self.docIDs = docIDs
         self.conflicts = conflicts
@@ -157,34 +157,18 @@ public class GetChangesOperation : CouchDatabaseOperation, JSONOperation {
         return "/\(self.databaseName)/_changes"
     }
     
-    public var parameters: [String : String] {
+    public var parameters: [String: String] {
         get {
-            var params: [String: String] = [:]
-            
-            if let conflicts = conflicts {
-                params["conflicts"] = conflicts.description
-            }
-            
-            if let descending = descending {
-                params["descending"] = descending.description
-            }
-            
-            
-            if let filter = filter {
-                params["filter"] = filter
-            }
-            
-            if let includeDocs = includeDocs {
-                params["include_docs"] = includeDocs.description
-            }
-            
-            if let includeAttachments = includeAttachments {
-                params["attachments"] = includeAttachments.description
-            }
-            
-            if let includeAttachmentEncodingInformation = includeAttachmentEncodingInformation {
-                params["att_encoding_info"] = includeAttachmentEncodingInformation.description
-            }
+            var params: [String: String] = [
+                "conflicts": conflicts?.description,
+                "descending": descending?.description,
+                "filter": filter,
+                "include_docs": includeDocs?.description,
+                "attachments": includeAttachments?.description,
+                "att_encoding_info": includeAttachmentEncodingInformation?.description,
+                "style": style?.rawValue,
+                "view": view
+                ].compactMapValues({ $0 })
             
             if let limit = limit {
                 params["limit"] = "\(limit)"
@@ -194,19 +178,11 @@ public class GetChangesOperation : CouchDatabaseOperation, JSONOperation {
                 params["since"] = "\(since)"
             }
             
-            if let style = style {
-                params["style"] = style.rawValue
-            }
-            
-            if let view = view {
-                params["view"] = view
-            }
-            
             return params
         }
     }
     
-    private var jsonData: Data? = nil
+    private var jsonData: Data?
     
     public func serialise() throws {
         if let docIDs = docIDs {

@@ -21,23 +21,22 @@ import Foundation
  Example usage:
  ```
  let allDocs = GetAllDocsOperation(databaseName: "exampleDB",
-        rowHandler: { doc in
-            print("Got document: \(doc)")
-        }) { response, info, error in
-                if let error = error {
-                    // handle error
-                } else {
-                    // handle successful response
-            }
+ rowHandler: { doc in
+ print("Got document: \(doc)")
+ }) { response, info, error in
+ if let error = error {
+ // handle error
+ } else {
+ // handle successful response
+ }
  }
  client.add(operation: allDocs)
  ```
  */
-public class GetAllDocsOperation : CouchOperation, ViewOperation, JSONOperation {
-    public typealias Json = [String : Any]
-
+public class GetAllDocsOperation: CouchOperation, ViewOperation, JSONOperation {
+    public typealias Json = [String: Any]
     
-    public let completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)?
+    public let completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)?
     
     public let rowHandler: (([String: Any]) -> Void)?
     
@@ -50,9 +49,9 @@ public class GetAllDocsOperation : CouchOperation, ViewOperation, JSONOperation 
     public let includeDocs: Bool?
     
     public let conflicts: Bool?
-
+    
     public let inclusiveEnd: Bool?
-
+    
     public let key: String?
     
     public let keys: [String]?
@@ -111,7 +110,7 @@ public class GetAllDocsOperation : CouchOperation, ViewOperation, JSONOperation 
                 includeLastUpdateSequenceNumber: Bool? = nil,
                 inclusiveEnd: Bool? = nil,
                 rowHandler: (([String: Any]) -> Void)? = nil,
-                completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)? = nil){
+                completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
         
         self.databaseName = databaseName
         self.descending = descending
@@ -134,7 +133,6 @@ public class GetAllDocsOperation : CouchOperation, ViewOperation, JSONOperation 
     
     private var jsonData: Data?
     
-    
     public func validate() -> Bool {
         
         if conflicts != nil && includeDocs != true {
@@ -152,9 +150,9 @@ public class GetAllDocsOperation : CouchOperation, ViewOperation, JSONOperation 
         return "/\(databaseName)/_all_docs"
     }
     
-    public var parameters: [String : String] {
+    public var parameters: [String: String] {
         get {
-            var params:[String: String] = makeParams()
+            var params: [String: String] = makeParams()
             
             if let endKeyJson = endKeyJson {
                 params["endkey"] = endKeyJson
@@ -168,7 +166,7 @@ public class GetAllDocsOperation : CouchOperation, ViewOperation, JSONOperation 
                 params["startkey"] = startKeyJson
             }
             
-            return params;
+            return params
         }
     }
     
@@ -198,4 +196,3 @@ public class GetAllDocsOperation : CouchOperation, ViewOperation, JSONOperation 
     }
     
 }
-

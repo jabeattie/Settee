@@ -14,28 +14,27 @@
 //  and limitations under the License.
 //
 
-
 import Foundation
 
 /**
-    An operation to create a JSON Query (Mango) Index.
+ An operation to create a JSON Query (Mango) Index.
  
-    Usage example:
-    ```
-    let index = CreateJSONQueryIndexOperation(databaseName: "exampledb",
-        designDocumentID: "examples",
-        name:"exampleIndex", 
-        fields: [Sort(field:"food", sort: .desc)]) { (response, httpInfo, error) in
-        if let error = error {
-            // handle the error
-        } else {
-            // Check the status code for success.
-        }
+ Usage example:
+ ```
+ let index = CreateJSONQueryIndexOperation(databaseName: "exampledb",
+ designDocumentID: "examples",
+ name:"exampleIndex",
+ fields: [Sort(field:"food", sort: .desc)]) { (response, httpInfo, error) in
+ if let error = error {
+ // handle the error
+ } else {
+ // Check the status code for success.
+ }
  
-    }
+ }
  
-    client.add(operation: index)
-    ```
+ client.add(operation: index)
+ ```
  */
 public class CreateJSONQueryIndexOperation: CouchDatabaseOperation, MangoOperation, JSONOperation {
     
@@ -46,12 +45,12 @@ public class CreateJSONQueryIndexOperation: CouchDatabaseOperation, MangoOperati
      if set to `nil` the server will create a new design document with a generated ID.
      - parameter fields : the fields to be indexed.
      - parameter completionHandler: block to run when the operation completes.
-    */
+     */
     public init(databaseName: String,
-            designDocumentID: String? = nil,
-                        name: String? = nil,
-                      fields: [Sort],
-                              completionHandler: (( [String : Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
+                designDocumentID: String? = nil,
+                name: String? = nil,
+                fields: [Sort],
+                completionHandler: (( [String: Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
         self.databaseName = databaseName
         self.fields = fields
         self.designDocumentID = designDocumentID
@@ -61,7 +60,7 @@ public class CreateJSONQueryIndexOperation: CouchDatabaseOperation, MangoOperati
     
     public let databaseName: String
     
-    public let completionHandler: (( [String : Any]?, HTTPInfo?, Error?) -> Void)?
+    public let completionHandler: (( [String: Any]?, HTTPInfo?, Error?) -> Void)?
     
     /**
      The name of the index.
@@ -78,14 +77,13 @@ public class CreateJSONQueryIndexOperation: CouchDatabaseOperation, MangoOperati
      create a new design document with a generated ID.
      */
     public let designDocumentID: String?
-
-    private var jsonData: Data?
     
+    private var jsonData: Data?
     
     public var method: String {
         return "POST"
     }
-
+    
     public var data: Data? {
         return self.jsonData
     }
@@ -93,33 +91,31 @@ public class CreateJSONQueryIndexOperation: CouchDatabaseOperation, MangoOperati
     public var endpoint: String {
         return "/\(self.databaseName)/_index"
     }
-
+    
     public func serialise() throws {
         
         var jsonDict: [String: Any] = ["type": "json"]
-
+        
         var index: [String: Any] = [:]
         index["fields"] = transform(sortArray: fields)
         jsonDict["index"] = index
-            
         
-
         if let name = name {
             jsonDict["name"] = name
         }
-
+        
         if let designDocumentID = designDocumentID {
             jsonDict["ddoc"] = designDocumentID
         }
-
+        
         jsonData = try JSONSerialization.data(withJSONObject: jsonDict)
-
+        
     }
     
 }
 
 /**
-  A struct to represent a field in a Text index.
+ A struct to represent a field in a Text index.
  */
 public struct TextIndexField {
     
@@ -130,33 +126,31 @@ public struct TextIndexField {
         /**
          A Boolean data type.
          */
-        case boolean = "boolean"
+        case boolean
         /**
          A String data type.
          */
-        case string = "string"
+        case string
         /**
          A Number data type.
          */
-        case number =  "number"
+        case number
     }
     
     /**
      The name of the field
-    */
+     */
     public let name: String
     /**
      The type of field.
      */
     public let type: Type
-  
+    
     public init(name: String, type: Type) {
         self.name = name
         self.type = type
     }
 }
-
-
 
 /**
  An Operation to create a Text Query (Mango) Index.
@@ -164,17 +158,17 @@ public struct TextIndexField {
  Usage Example:
  ```
  let index = CreateTextQueryIndexOperation(databaseName: "exampledb",
-            name: "example",
-            fields: [TextIndexField(name:"food", type: .string),
-            defaultFieldAnalyzer: "english",
-            defaultFieldEnabled:  true,
-            selector:["type": "food"],
-            designDocumentID: "examples"){ (response, httpInfo, error) in
-    if let error = error {
-        // handle the error
-    } else {
-        // Check the status code for success.
-    }
+ name: "example",
+ fields: [TextIndexField(name:"food", type: .string),
+ defaultFieldAnalyzer: "english",
+ defaultFieldEnabled:  true,
+ selector:["type": "food"],
+ designDocumentID: "examples"){ (response, httpInfo, error) in
+ if let error = error {
+ // handle the error
+ } else {
+ // Check the status code for success.
+ }
  }
  client.add(operation: index)
  */
@@ -196,13 +190,13 @@ public class CreateTextQueryIndexOperation: CouchDatabaseOperation, MangoOperati
      - parameter completionHandler: optional handler to run when the operation completes.
      */
     public init(databaseName: String,
-                        name: String? = nil,
-                      fields: [TextIndexField]? = nil,
-        defaultFieldAnalyzer: String? = nil,
-         defaultFieldEnabled: Bool? = nil,
-                    selector: [String:Any]? = nil,
-                   designDocumentID: String? = nil,
-           completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
+                name: String? = nil,
+                fields: [TextIndexField]? = nil,
+                defaultFieldAnalyzer: String? = nil,
+                defaultFieldEnabled: Bool? = nil,
+                selector: [String: Any]? = nil,
+                designDocumentID: String? = nil,
+                completionHandler: (([String: Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
         self.databaseName = databaseName
         self.completionHandler = completionHandler
         self.name = name
@@ -214,7 +208,7 @@ public class CreateTextQueryIndexOperation: CouchDatabaseOperation, MangoOperati
     }
     
     public let databaseName: String
-    public let completionHandler: ((_ response: [String : Any]?, _ httpInfo: HTTPInfo?, _ error: Error?) -> Void)?
+    public let completionHandler: ((_ response: [String: Any]?, _ httpInfo: HTTPInfo?, _ error: Error?) -> Void)?
     
     /**
      The name of the index
@@ -248,8 +242,8 @@ public class CreateTextQueryIndexOperation: CouchDatabaseOperation, MangoOperati
      The name of the design doc this index should be included with
      */
     public let designDocumentID: String?
-
-    private var jsonData : Data?
+    
+    private var jsonData: Data?
     public  var data: Data? {
         return jsonData
     }
@@ -263,7 +257,7 @@ public class CreateTextQueryIndexOperation: CouchDatabaseOperation, MangoOperati
     }
     
     public func validate() -> Bool {
-
+        
         if let selector = selector {
             return JSONSerialization.isValidJSONObject(selector)
         }
@@ -272,7 +266,6 @@ public class CreateTextQueryIndexOperation: CouchDatabaseOperation, MangoOperati
     }
     
     public func serialise() throws {
-
         do {
             var jsonDict: [String: Any] = [:]
             var index: [String: Any] = [:]
@@ -304,19 +297,15 @@ public class CreateTextQueryIndexOperation: CouchDatabaseOperation, MangoOperati
                 index["selector"] = selector
             }
             
-            if defaultField.count > 0 {
+            if !defaultField.isEmpty {
                 index["default_field"] = defaultField
             }
             
-            if index.count > 0 {
+            if !index.isEmpty {
                 jsonDict["index"] = index
             }
             
-            self.jsonData = try JSONSerialization.data(withJSONObject:jsonDict)
-
+            self.jsonData = try JSONSerialization.data(withJSONObject: jsonDict)
         }
-        
     }
-    
 }
-

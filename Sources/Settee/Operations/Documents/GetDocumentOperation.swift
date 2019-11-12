@@ -24,29 +24,28 @@ import Foundation
  
  ```
  let getDoc = GetDocumentOperation(id:"example", databaseName:"exampledb"){ (response, httpInfo, error) in 
-    if let error = error {
-        // handle the error
-    } else {
-        // check the response code to determine if the request was successful.
-    }
+ if let error = error {
+ // handle the error
+ } else {
+ // check the response code to determine if the request was successful.
+ }
  }
  ```
  
  */
 public class GetDocumentOperation: CouchDatabaseOperation, JSONOperation {
-    public typealias Json = [String: Any]
-
-
+    public typealias Json = Document
+    
     /**
      Creates the operation.
      
-      - parameter id: the id of the document to get from the database.
-      - parameter databaseName : the name of the database which contains the document
-      - parameter includeRevisions : include information about previous revisions of the document
-      - parameter revision: the revision of the document to get
-      - parameter completionHandler: optional handler to run when the operation completes.
+     - parameter id: the id of the document to get from the database.
+     - parameter databaseName : the name of the database which contains the document
+     - parameter includeRevisions : include information about previous revisions of the document
+     - parameter revision: the revision of the document to get
+     - parameter completionHandler: optional handler to run when the operation completes.
      */
-    public init(id: String, databaseName:String, includeRevisions:Bool? = nil, revision: String? = nil, completionHandler:(([String : Any]?, HTTPInfo?, Error?) -> Void)? = nil) {
+    public init(id: String, databaseName: String, includeRevisions: Bool? = nil, revision: String? = nil, completionHandler: ((Document?, HTTPInfo?, Error?) -> Void)? = nil) {
         self.id = id
         self.databaseName = databaseName
         self.includeRevisions = includeRevisions
@@ -54,7 +53,7 @@ public class GetDocumentOperation: CouchDatabaseOperation, JSONOperation {
         self.completionHandler = completionHandler
     }
     
-    public let completionHandler: (([String : Any]?, HTTPInfo?, Error?) -> Void)?
+    public let completionHandler: ((Document?, HTTPInfo?, Error?) -> Void)?
     
     public let databaseName: String
     
@@ -62,35 +61,35 @@ public class GetDocumentOperation: CouchDatabaseOperation, JSONOperation {
      Include all revisions of the document.
      */
     public let includeRevisions: Bool?
-
+    
     /**
      The revision of the document to get.
      */
     public let revision: String?
-
+    
     /**
      The id of the document that this operation will retrieve.
      */
     public let id: String
-
+    
     public var endpoint: String {
         return "/\(self.databaseName)/\(id)"
     }
-
-    public var parameters: [String:  String] {
+    
+    public var parameters: [String: String] {
         get {
             var items: [String: String] = [:]
-
+            
             if let revision = revision {
                 items["rev"] = revision
             }
-
+            
             if let includeRevisions = includeRevisions {
                 items["revs"] = "\(includeRevisions)"
             }
-
+            
             return items
         }
     }
-
+    
 }

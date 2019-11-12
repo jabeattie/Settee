@@ -17,7 +17,7 @@ internal protocol InterceptableSessionDelegate {
      Called when the response is received from the server
      - parameter response: The response received from the server
     */
-    func received(response:HTTPURLResponse)
+    func received(response: HTTPURLResponse)
     
     /**
     Called when response data is available from the server, may be called multiple times.
@@ -80,11 +80,11 @@ internal struct InterceptableSessionConfiguration {
     
     internal var password: String?
     
-    init(maxRetries: UInt = 10, shouldBackOff:Bool,
+    init(maxRetries: UInt = 10, shouldBackOff: Bool,
          backOffRetries: UInt = 3,
          initialBackOff: DispatchTimeInterval = .milliseconds(250),
          username: String? = nil,
-         password: String? = nil ){
+         password: String? = nil) {
         
         self.maxRetries = maxRetries
         self.shouldBackOff = shouldBackOff
@@ -108,9 +108,9 @@ internal class URLSessionTask {
     
     //This  is for caching before delivering the response to the delegate in the event a 401/403 is
     // encountered.
-    fileprivate var response: HTTPURLResponse? = nil
+    fileprivate var response: HTTPURLResponse?
     // Caching of the data before being delivered to the delegate in the event of a 401/403 response.
-    fileprivate var data: Data? = nil
+    fileprivate var data: Data?
 
     public var state: Foundation.URLSessionTask.State {
         get {
@@ -125,7 +125,7 @@ internal class URLSessionTask {
      - parameter inProgressTask: The NSURLSessionDataTask that is performing the request in NSURLSession.
      - parameter delegate: The delegate for this task.
      */
-    init(session: URLSession, request: URLRequest, inProgressTask:URLSessionDataTask, delegate: InterceptableSessionDelegate) {
+    init(session: URLSession, request: URLRequest, inProgressTask: URLSessionDataTask, delegate: InterceptableSessionDelegate) {
         self.request = request
         self.session = session
         self.delegate = delegate
@@ -169,7 +169,7 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
     
     private let configuration: InterceptableSessionConfiguration
     
-    private var isFirstRequest:Bool = true
+    private var isFirstRequest: Bool = true
     
     private let sessionRequestBody: Data? // This will be the body sent to _session.
     
@@ -195,7 +195,7 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
             let payload = "name=\(encodedUsername)&password=\(encodedPassword)"
             sessionRequestBody = payload.data(using: .ascii)!
         } else {
-            sessionRequestBody = nil;
+            sessionRequestBody = nil
         }
     }
 
@@ -214,7 +214,6 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
             requestCookie(url: url)
         }
         
-        
         // create the underlying task.
         let nsTask = self.session.dataTask(with: request)
         let task = URLSessionTask(session: session, request: request, inProgressTask: nsTask, delegate: delegate)
@@ -226,13 +225,11 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
         return task
     }
     
-    
     internal func urlSession(_ session: URLSession, task: Foundation.URLSessionTask, didCompleteWithError error: Error?) {
         guard let mTask = taskDict[task]
         else {
                 return
         }
-      
         
         // We need to dispatch onto the delegate queue because
         // otherwise we block the delegate queue for the underlying URLSession
@@ -257,8 +254,8 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
                     self.requestCookie(url: mTask.request.url!)
                     
                     //clear the task cache
-                    mTask.data = nil;
-                    mTask.response = nil;
+                    mTask.data = nil
+                    mTask.response = nil
                     
                     let nsTask = self.session.dataTask(with: mTask.request)
                     self.taskDict[nsTask] = mTask
@@ -272,7 +269,6 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
                 mTask.delegate.received(data: data)
                 
             }
-            
             
             mTask.delegate.completed(error: error)
             // remove the task from the dict so it can be released.
@@ -316,7 +312,7 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
                 
                 let deadline: DispatchWallTime
                 
-                var backOffTime:DispatchTimeInterval = configuration.initialBackOff
+                var backOffTime: DispatchTimeInterval = configuration.initialBackOff
                 // calculate the doubling back off.
                 for _ in 0...(configuration.backOffRetries - task.remainingBackOffRetries ) {
                     backOffTime = backOffTime * 2
@@ -365,12 +361,10 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
         let components = NSURLComponents(url: url, resolvingAgainstBaseURL: false)!
         components.path = "/_session"
         
-        
         var request = URLRequest(url: components.url!)
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "POST"
         request.httpBody = sessionRequestBody
-        
         
         let semaphore = DispatchSemaphore(value: 0)
         
@@ -380,7 +374,7 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
             defer { semaphore.signal() }
             
             guard let data = data1, let response = response as? HTTPURLResponse, error == nil
-                else  {
+                else {
                     // failed to get the cookie should log something probably.
                     NSLog("Failed to get response from server")
                     return
@@ -391,7 +385,7 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
                 do {
                     // Only check for ok:true, https://issues.apache.org/jira/browse/COUCHDB-1356
                     // means we cannot check that the name returned is the one we sent.
-                    if let json = try JSONSerialization.jsonObject(with: data) as? [String : Any]{
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
                         if let ok = json["ok"] as? Bool, ok {
                             // everything seems to match up here,
                             // URL Session will save cookies we can send the response straight through
@@ -417,7 +411,7 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
             } else if response.statusCode == 401 {
                 // creds error.
                 self.shouldMakeCookieRequest = false
-                NSLog("Credentials are incorrect, cookie authentication will not be attempted again for this session");
+                NSLog("Credentials are incorrect, cookie authentication will not be attempted again for this session")
             } else {
                 self.shouldMakeCookieRequest = false
                 NSLog("Could not get cookie form the server, received status code: \(response.statusCode)")
@@ -426,7 +420,7 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
         task.resume()
         // we should wait for the task to come back before continuting.
         // we also don't really care if it timed out maybe we should?.
-        let _ = semaphore.wait(wallTimeout: DispatchWallTime.now() + .seconds(600))
+        _ = semaphore.wait(wallTimeout: DispatchWallTime.now() + .seconds(600))
     }
 
     deinit {
@@ -446,7 +440,7 @@ internal class InterceptableSession: NSObject, URLSessionDelegate, URLSessionTas
 
 fileprivate extension DispatchTimeInterval {
     static func *(interval: DispatchTimeInterval, multiple: Int) -> DispatchTimeInterval {
-        switch (interval){
+        switch (interval) {
         case .microseconds(let value):
             return .microseconds(value * multiple)
         case .milliseconds(let value):

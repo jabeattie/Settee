@@ -15,41 +15,43 @@ import Foundation
  ```
  let documents = [["hello":"world"], ["foo":"bar", "_id": "foobar", "_rev": "1-revision"]]
  let bulkDocs = PutBulkDocsOperation(databaseName: "exampleDB", documents: documents) { response, httpInfo, error in
-    guard let response = response, httpInfo = httpInfo, error == nil
-    else {
-        //handle the error
-        return
-    }
+ guard let response = response, httpInfo = httpInfo, error == nil
+ else {
+ //handle the error
+ return
+ }
  
-    //handle success.
+ //handle success.
  }
  
  ```
  */
-public class PutBulkDocsOperation : CouchDatabaseOperation, JSONOperation {
+public class PutBulkDocsOperation: CouchDatabaseOperation, JSONOperation {
     
-    public typealias Json = [[String: Any]]
-
+    public typealias Json = [Document]
+    
     public let databaseName: String
     
-    public let completionHandler: (([[String:Any]]?, HTTPInfo?, Error?) -> Void)?
+    public let completionHandler: (([Document]?, HTTPInfo?, Error?) -> Void)?
     
     /**
      The documents that make up this request.
-    */
-    public let documents: [[String:Any]]
+     */
+    public let documents: [Document]
     
     /**
      If false, CouchDB will not assign documents new revision IDs. This option is normally
      used for replication with CouchDB.
-    */
+     */
     public let newEdits: Bool?
     
     /**
-    If true the commit mode for the request will be "All or Nothing" meaning that if one document
-    fails to be created or updated, no documents will be commited to the database.
-    */
+     If true the commit mode for the request will be "All or Nothing" meaning that if one document
+     fails to be created or updated, no documents will be commited to the database.
+     */
     public let allOrNothing: Bool?
+    
+    private var jsonData: Data?
     
     /**
      Creates the operation
@@ -62,10 +64,10 @@ public class PutBulkDocsOperation : CouchDatabaseOperation, JSONOperation {
      - parameter completionHandler: Optional handler to call when the operation completes.
      */
     public init(databaseName: String,
-                documents:[[String:Any]],
+                documents: [Document],
                 newEdits: Bool? = nil,
                 allOrNothing: Bool? = nil,
-                completionHandler: (([[String:Any]]?, HTTPInfo?, Error?) -> Void)? = nil){
+                completionHandler: (([Document]?, HTTPInfo?, Error?) -> Void)? = nil) {
         self.databaseName = databaseName
         self.documents = documents
         self.newEdits = newEdits
@@ -73,19 +75,16 @@ public class PutBulkDocsOperation : CouchDatabaseOperation, JSONOperation {
         self.completionHandler = completionHandler
     }
     
-    public var endpoint: String {
-        return "/\(databaseName)/_bulk_docs"
-    }
+    public var endpoint: String { "/\(databaseName)/_bulk_docs" }
     
-    public func validate() -> Bool {
-        return JSONSerialization.isValidJSONObject(documents)
-    }
+    public func validate() -> Bool { JSONSerialization.isValidJSONObject(documents) }
     
+    public var data: Data? { jsonData }
     
-    private var jsonData: Data?
+    public var method: String { "POST" }
     
     public func serialise() throws {
-        var request:[String: Any] = ["docs":documents]
+        var request: [String: Any] = ["docs": documents.map({ $0.toDictionary() })]
         
         if let newEdits = newEdits {
             request["new_edits"] = newEdits
@@ -95,14 +94,6 @@ public class PutBulkDocsOperation : CouchDatabaseOperation, JSONOperation {
             request["all_or_nothing"] = allOrNothing
         }
         
-        jsonData = try JSONSerialization.data(withJSONObject: request);
-    }
-    
-    public var data: Data? {
-        return jsonData
-    }
-    
-    public var method:String {
-        return "POST"
+        jsonData = try JSONSerialization.data(withJSONObject: request)
     }
 }

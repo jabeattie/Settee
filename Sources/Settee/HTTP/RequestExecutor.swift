@@ -72,7 +72,7 @@ class OperationRequestExecutor: InterceptableSessionDelegate {
         let httpInfo: HTTPInfo?
         
         if let response = response {
-                var headers:[String: String] = [:]
+                var headers: [String: String] = [:]
                 for (key, value) in response.allHeaderFields {
                     headers["\(key)"] = "\(value)"
                 }
